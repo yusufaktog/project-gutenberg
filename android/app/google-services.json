@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "317129222736",
+    "project_id": "project-gutenberg-5669d",
+    "storage_bucket": "project-gutenberg-5669d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317129222736:android:11287696744ffb375b3f55",
+        "android_client_info": {
+          "package_name": "com.example.project_gutenberg"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "317129222736-eta3n6r6i9ggcdfvjdd115g5qb4bbmgq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgVA5P5rJbfjeziAQQIJeNw5V1wEvTEoA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "317129222736-eta3n6r6i9ggcdfvjdd115g5qb4bbmgq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
