@@ -1,27 +1,33 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_gutenberg/constants.dart';
-import 'package:project_gutenberg/user.dart';
 
 import 'book_card.dart';
 import 'book_details.dart';
 import 'bookshelf_page.dart';
+import 'database/auth.dart';
+import 'main.dart';
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+class SearchBookPage extends StatefulWidget {
+  final User? user;
+
+  const SearchBookPage({Key? key, required this.user}) : super(key: key);
+
+  static const routeName = '/search_book_page';
 
   @override
-  _MyAppState createState() => _MyAppState();
+  _SearchBookPageState createState() => _SearchBookPageState();
 }
 
 TextEditingController t1 = TextEditingController();
 
-class _MyAppState extends State<MyApp> {
-  User user = User(name: "Yusuf Aktoğ", email: "yusufaktok@gmail.com");
+class _SearchBookPageState extends State<SearchBookPage> {
   late List<BookCard> results = [];
+  final AuthService _authService = AuthService();
   Timer? _debounce;
 
   void searchBook(String query) async {
@@ -42,23 +48,32 @@ class _MyAppState extends State<MyApp> {
       String coverThumb = "";
       String title = "";
       String author = "";
+      String id = "";
       Book book;
       try {
         title = element.getElementsByClassName("title")[0].text;
         author = element.getElementsByClassName("subtitle")[0].text;
+        id = element
+            .getElementsByClassName("link")[0]
+            .attributes["href"]!
+            .split('/')[2];
         coverThumb = "https://gutenberg.org/" +
             element.getElementsByClassName("cover-thumb")[0].attributes["src"]!;
 
-        book = Book.previewed(coverThumb, title, author);
+        book = Book.previewed(coverThumb, title, author, 1, id);
         setState(() {
           results.add(BookCard(
-            user: user,
+            user: widget.user,
             book: book,
           ));
         });
       } on RangeError {
         setState(() {
-          book = Book.previewed(coverThumb, title, author);
+          coverThumb = "";
+          book = Book.previewed(coverThumb, title, author, 1, id);
+          results.add(
+            BookCard(user: widget.user, book: book),
+          );
         });
         print('Content of book is corrupted!');
       }
@@ -94,14 +109,14 @@ class _MyAppState extends State<MyApp> {
                 UserAccountsDrawerHeader(
                     currentAccountPicture: CircleAvatar(
                       backgroundColor: Colors.red[400],
-                      child: Icon(
+                      child: const Icon(
                         Icons.account_circle,
                         size: 50,
                         color: Colors.grey,
                       ),
                     ),
-                    accountName: Text(user.name),
-                    accountEmail: Text(user.email)),
+                    accountName: Text("default"),
+                    accountEmail: Text("default")),
                 const DrawerHeader(
                   child: Center(
                     child: Text('Email'),
@@ -116,9 +131,7 @@ class _MyAppState extends State<MyApp> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => BookshelfPage(
-                          user: user,
-                        ),
+                        builder: (context) => const BookshelfPage(),
                       ),
                     );
                   },
@@ -128,11 +141,10 @@ class _MyAppState extends State<MyApp> {
                   title: const Text('Log Out'),
                   tileColor: Colors.red,
                   onTap: () {
+                    _authService.signOut();
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => BookshelfPage(
-                          user: user,
-                        ),
+                        builder: (context) => const LoginPage(),
                       ),
                     );
                   },
@@ -209,12 +221,9 @@ class _MyAppState extends State<MyApp> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => DetailedBookPage(
-                                id: results[index]
-                                    .book
-                                    .coverImageUrl
-                                    .split('/')[6],
-                                title: results[index].book.title //split et
-                                ),
+                                id: results[index].book.id!,
+                                title: results[index].book.title,
+                                bookmark: 1),
                           ),
                         );
                       },

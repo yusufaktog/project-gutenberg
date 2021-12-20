@@ -18,6 +18,7 @@ class AuthService {
         .collection("User")
         .doc(user.user!.uid)
         .set({'name': name, 'email': email});
+    await user.user!.updateDisplayName(name);
     return user.user;
   }
 

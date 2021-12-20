@@ -1,9 +1,9 @@
 import 'book_card.dart';
 
-class User {
+class Reader {
   String name;
-  String password;
+  String email;
   List<Book> bookShelf = [];
 
-  User({required this.name, required this.password});
+  Reader({required this.name, required this.email});
 }

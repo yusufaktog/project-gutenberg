@@ -1,5 +1,20 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'main.dart';
+
 const coverThumb = "https://gutenberg.org/";
-const icon = Icon(Icons.search);
+const searchIcon = Icon(Icons.search);
 const preferredAppBarHeight = Size.fromHeight(100);
+var routes = {
+  LoginPage.routeName: (context) => const LoginPage(),
+};
+
+FirebaseOptions firebaseConfig = const FirebaseOptions(
+  apiKey: "AIzaSyDgVA5P5rJbfjeziAQQIJeNw5V1wEvTEoA",
+  authDomain: "project-gutenberg-5669d.firebaseapp.com",
+  projectId: "project-gutenberg-5669d",
+  storageBucket: "project-gutenberg-5669d.appspot.com",
+  messagingSenderId: "317129222736",
+  appId: "1:317129222736:android:11287696744ffb375b3f55",
+);
