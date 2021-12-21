@@ -60,7 +60,7 @@ class _SearchBookPageState extends State<SearchBookPage> {
         coverThumb = "https://gutenberg.org/" +
             element.getElementsByClassName("cover-thumb")[0].attributes["src"]!;
 
-        book = Book.previewed(coverThumb, title, author, 1, id);
+        book = Book.previewed(coverThumb, title, author, 0, id);
         setState(() {
           results.add(BookCard(
             user: widget.user,
@@ -70,7 +70,7 @@ class _SearchBookPageState extends State<SearchBookPage> {
       } on RangeError {
         setState(() {
           coverThumb = "";
-          book = Book.previewed(coverThumb, title, author, 1, id);
+          book = Book.previewed(coverThumb, title, author, 0, id);
           results.add(
             BookCard(user: widget.user, book: book),
           );
@@ -223,7 +223,7 @@ class _SearchBookPageState extends State<SearchBookPage> {
                             builder: (context) => DetailedBookPage(
                                 id: results[index].book.id!,
                                 title: results[index].book.title,
-                                bookmark: 1),
+                                bookmark: 0),
                           ),
                         );
                       },

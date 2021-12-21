@@ -21,7 +21,7 @@ class _BookshelfPageState extends State<BookshelfPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black87,
+      backgroundColor: Colors.grey,
       appBar: AppBar(
         title: const Center(child: Text("_user!.displayName.toString()")),
       ),
@@ -52,14 +52,18 @@ class _BookshelfPageState extends State<BookshelfPage> {
                                 ),
                               );
                             },
-                            child: BookCard(
-                              user: _user,
-                              book: Book.previewed(
-                                  books[index]["image_url"],
-                                  books[index]["title"],
-                                  books[index]["author"],
-                                  books[index]["bookmark"],
-                                  books[index]["id"]),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0, horizontal: 16.0),
+                              child: BookCard(
+                                user: _user,
+                                book: Book.previewed(
+                                    books[index]["image_url"],
+                                    books[index]["title"],
+                                    books[index]["author"],
+                                    books[index]["bookmark"],
+                                    books[index]["id"]),
+                              ),
                             ),
                           );
                         })

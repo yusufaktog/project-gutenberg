@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
@@ -19,11 +20,7 @@ class BookReader extends StatefulWidget {
 }
 
 class _BookReaderState extends State<BookReader> {
-  late var _controller;
-
-  Future<void> getIndex() async {
-    _controller = IndexedScrollController(initialIndex: widget.bookmark);
-  }
+  late IndexedScrollController _controller;
 
   List<String> pages = [];
 
@@ -52,13 +49,14 @@ class _BookReaderState extends State<BookReader> {
   void initState() {
     super.initState();
     getBookContent();
-    getIndex();
+    _controller = IndexedScrollController(initialIndex: widget.bookmark);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.grey,
         appBar: AppBar(
           centerTitle: true,
           title: Padding(
@@ -76,7 +74,10 @@ class _BookReaderState extends State<BookReader> {
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
                       children: [
-                        Text(pages[index]),
+                        Text(
+                          pages[index],
+                          style: const TextStyle(fontSize: 15.0),
+                        ),
                         IconButton(
                           iconSize: 15,
                           tooltip: "Add Bookmark",
@@ -86,7 +87,12 @@ class _BookReaderState extends State<BookReader> {
                           ),
                           color: Colors.red,
                           onPressed: () {
-                            DatabaseHelper.updateBookmark(widget.id, index);
+                            try {
+                              DatabaseHelper.updateBookmark(widget.id, index);
+                            } on FirebaseException {
+                              print(
+                                  "You do not have this book in your bookshelf");
+                            }
                           },
                         ),
                       ],

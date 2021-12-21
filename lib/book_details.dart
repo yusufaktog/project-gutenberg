@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
@@ -7,9 +9,9 @@ import 'package:project_gutenberg/read_book_page.dart';
 class DetailedBookPage extends StatefulWidget {
   final String id;
   final String title;
-  final int bookmark;
+  int bookmark;
 
-  const DetailedBookPage(
+  DetailedBookPage(
       {Key? key, required this.id, required this.title, required this.bookmark})
       : super(key: key);
 
@@ -62,6 +64,33 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
     }
   }
 
+  void getBookMark() async {
+    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+    final User? user = _firebaseAuth.currentUser;
+    String uid = user!.uid;
+    int bookmark = 0;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection("Bookshelves")
+          .doc(uid)
+          .collection("Bookshelf")
+          .doc(widget.id)
+          .snapshots()
+          .forEach((element) {
+        if (element["id"] == widget.id) {
+          setState(() {
+            bookmark = element["bookmark"];
+          });
+        }
+        widget.bookmark = bookmark;
+      });
+    } on Error {
+      //widget.bookmark = bookmark; // if the book does not exist in the bookshelf
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +101,7 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.grey,
         appBar: AppBar(
           centerTitle: true,
           title: Padding(
@@ -106,6 +136,9 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                                 borderRadius: BorderRadius.circular(10.0)),
                             child: TextButton(
                               onPressed: () {
+                                getBookMark();
+                                print("bookmark updated:${widget.bookmark}");
+
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => BookReader(
@@ -118,29 +151,37 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(
                                     vertical: 20.0, horizontal: 50),
-                                child: Text("ADD BOOK"),
+                                child: Text("Read Book"),
                               ),
                             ),
                           ),
-                          Card(
+                          /*Card(
                             color: Colors.red,
                             margin: const EdgeInsets.all(8.0),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)),
                             child: TextButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                await DatabaseHelper.bookshelfContains(
+                                            widget.id)
+                                        .then((value) {
+                                  return value;
+                                })
+                                    ? DatabaseHelper.removeBook(widget.id)
+                                    : DatabaseHelper.addBook(widget.book);
+                              },
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(
                                     vertical: 20.0, horizontal: 50),
-                                child: Text("READ BOOK"),
+                                child: Text("Add / Remove BooK"),
                               ),
                             ),
-                          ),
+                          ),*/
                           Container(
-                            margin: EdgeInsets.all(8.0),
+                            margin: const EdgeInsets.all(8.0),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text("BOOKMARK: 12 "),
+                              child: Text("BOOKMARK:${widget.bookmark}"),
                             ),
                           ),
                         ],

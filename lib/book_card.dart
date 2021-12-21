@@ -37,6 +37,14 @@ class BookCard extends StatefulWidget {
 }
 
 class _BookCardState extends State<BookCard> {
+  late bool _hasBook;
+
+  @override
+  void initState() {
+    super.initState();
+    hasBook();
+  }
+
   @override
   Card build(BuildContext context) {
     return Card(
@@ -80,25 +88,31 @@ class _BookCardState extends State<BookCard> {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Card(
               color: Colors.red,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0)),
               child: TextButton(
-                onPressed: () {
-/*                  if (!widget.user.bookShelf.contains(widget.book)) {
-                    widget.user.bookShelf.add(widget.book);
-
-                  }*/
-                  DatabaseHelper.addBook(widget.book);
+                onPressed: () async {
+                  _hasBook =
+                      await DatabaseHelper.bookshelfContains(widget.book.id!)
+                          .then((value) {
+                    return value;
+                  });
+                  _hasBook
+                      ? DatabaseHelper.removeBook(widget.book.id!)
+                      : DatabaseHelper.addBook(widget.book);
                 },
-                child: const Text(
-                  "Add To Bookshelf",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10.0),
+                  child: Text(
+                    "Add / Remove \nBook",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -107,5 +121,12 @@ class _BookCardState extends State<BookCard> {
         ],
       ),
     );
+  }
+
+  void hasBook() async {
+    _hasBook =
+        await DatabaseHelper.bookshelfContains(widget.book.id!).then((value) {
+      return value;
+    });
   }
 }

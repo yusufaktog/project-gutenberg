@@ -47,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 children: <Widget>[
                   Card(
+                    elevation: 0.0,
                     color: Colors.grey,
                     margin: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 10.0),
@@ -63,6 +64,11 @@ class _LoginPageState extends State<LoginPage> {
                         cursorHeight: 25,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
+                          border: OutlineInputBorder(
+                              gapPadding: 100.0,
+                              //borderSide: BorderSide(style: BorderStyle.solid),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10))),
                           hintText: "email",
                           hintStyle: TextStyle(
                               color: Colors.black54,
@@ -74,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   Card(
+                    elevation: 2.0,
                     color: Colors.grey,
                     margin: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 10.0),
@@ -101,6 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   Card(
+                    elevation: 2.0,
                     color: Colors.grey,
                     margin: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 10.0),
