@@ -54,7 +54,10 @@ class _BookCardState extends State<BookCard> {
           Expanded(
             flex: 2,
             child: widget.book.coverImageUrl.isNotEmpty
-                ? Image.network(widget.book.coverImageUrl)
+                ? Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Image.network(widget.book.coverImageUrl),
+                  )
                 : Image.asset("no_image.png"),
           ),
           Expanded(
@@ -74,7 +77,7 @@ class _BookCardState extends State<BookCard> {
                   height: 15,
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
                   child: Text(
                     widget.book.author,
                     textAlign: TextAlign.center,
@@ -105,7 +108,7 @@ class _BookCardState extends State<BookCard> {
                       : DatabaseHelper.addBook(widget.book);
                 },
                 child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10.0),
+                  padding: EdgeInsets.symmetric(vertical: 1.0),
                   child: Text(
                     "Add / Remove \nBook",
                     textAlign: TextAlign.center,

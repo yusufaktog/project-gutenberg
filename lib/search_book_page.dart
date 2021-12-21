@@ -215,7 +215,7 @@ class _SearchBookPageState extends State<SearchBookPage> {
                 itemBuilder: (context, index) {
                   return SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
-                        vertical: 4.0, horizontal: 16.0),
+                        vertical: 10.0, horizontal: 16.0),
                     child: InkWell(
                       onTap: () {
                         Navigator.of(context).push(

@@ -109,113 +109,126 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
             child: Text(widget.title, overflow: TextOverflow.ellipsis),
           ),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Image.network(
-                          "https://gutenberg.org/cache/epub/${widget.id}/pg${widget.id}.cover.medium.jpg"),
+        body: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Image.network(
+                        "https://gutenberg.org/cache/epub/${widget.id}/pg${widget.id}.cover.medium.jpg"),
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Card(
+                          color: Colors.red,
+                          margin: const EdgeInsets.all(8.0),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0)),
+                          child: TextButton(
+                            onPressed: () {
+                              getBookMark();
+                              print("bookmark updated:${widget.bookmark}");
+
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => BookReader(
+                                      id: widget.id,
+                                      title: widget.title,
+                                      bookmark: widget.bookmark),
+                                ),
+                              );
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 20.0, horizontal: 50),
+                              child: Text("Read Book"),
+                            ),
+                          ),
+                        ),
+                        /*Card(
+                          color: Colors.red,
+                          margin: const EdgeInsets.all(8.0),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0)),
+                          child: TextButton(
+                            onPressed: () async {
+                              await DatabaseHelper.bookshelfContains(
+                                          widget.id)
+                                      .then((value) {
+                                return value;
+                              })
+                                  ? DatabaseHelper.removeBook(widget.id)
+                                  : DatabaseHelper.addBook(widget.book);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 20.0, horizontal: 50),
+                              child: Text("Add / Remove BooK"),
+                            ),
+                          ),
+                        ),*/
+                        Container(
+                          margin: const EdgeInsets.all(8.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text("BOOKMARK:${widget.bookmark}"),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Expanded(
-                    flex: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Card(
-                            color: Colors.red,
-                            margin: const EdgeInsets.all(8.0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
-                            child: TextButton(
-                              onPressed: () {
-                                getBookMark();
-                                print("bookmark updated:${widget.bookmark}");
-
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => BookReader(
-                                        id: widget.id,
-                                        title: widget.title,
-                                        bookmark: widget.bookmark),
-                                  ),
-                                );
-                              },
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 20.0, horizontal: 50),
-                                child: Text("Read Book"),
-                              ),
-                            ),
-                          ),
-                          /*Card(
-                            color: Colors.red,
-                            margin: const EdgeInsets.all(8.0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
-                            child: TextButton(
-                              onPressed: () async {
-                                await DatabaseHelper.bookshelfContains(
-                                            widget.id)
-                                        .then((value) {
-                                  return value;
-                                })
-                                    ? DatabaseHelper.removeBook(widget.id)
-                                    : DatabaseHelper.addBook(widget.book);
-                              },
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 20.0, horizontal: 50),
-                                child: Text("Add / Remove BooK"),
-                              ),
-                            ),
-                          ),*/
-                          Container(
-                            margin: const EdgeInsets.all(8.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text("BOOKMARK:${widget.bookmark}"),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              details.isNotEmpty
-                  ? ListView.builder(
+                )
+              ],
+            ),
+            details.isNotEmpty
+                ? Expanded(
+                    child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: details.length,
                       itemBuilder: (context, index) {
-                        return ListView(
-                          shrinkWrap: true,
-                          children: [
-                            Card(
-                              color: Colors.black54,
-                              elevation: 0.0,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Text(
-                                    keys[index] + ": " + details[keys[index]]!),
+                        return SingleChildScrollView(
+                          child: Card(
+                            color: Colors.grey[600],
+                            elevation: 0.0,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Row(
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      keys[index] + " : ",
+                                      maxLines: 1,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: Text(
+                                    details[keys[index]]!,
+                                    maxLines: 3,
+                                  ))
+                                ],
                               ),
-                            )
-                          ],
+                            ),
+                          ),
                         );
                       },
-                    )
-                  : const Center(
-                      child: CircularProgressIndicator(),
                     ),
-            ],
-          ),
+                  )
+                : const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+          ],
         ),
       ),
     );
