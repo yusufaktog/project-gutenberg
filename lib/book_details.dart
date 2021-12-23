@@ -9,10 +9,15 @@ import 'package:project_gutenberg/read_book_page.dart';
 class DetailedBookPage extends StatefulWidget {
   final String id;
   final String title;
+  final String imageUrl;
   int bookmark;
 
   DetailedBookPage(
-      {Key? key, required this.id, required this.title, required this.bookmark})
+      {Key? key,
+      required this.id,
+      required this.title,
+      required this.bookmark,
+      required this.imageUrl})
       : super(key: key);
 
   @override
@@ -23,7 +28,7 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
   late Map<String, String> details = {};
   late List<String> keys = [];
 
-  Future<void> searchBook() async {
+  Future<void> getBookDetails() async {
     var searchUrlFormat = "https://gutenberg.org/ebooks/${widget.id}";
     print("book link ==> " + searchUrlFormat);
     var parsedUrl = Uri.parse(searchUrlFormat);
@@ -64,7 +69,7 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
     }
   }
 
-  void getBookMark() async {
+  void getBookmark() async {
     final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     final User? user = _firebaseAuth.currentUser;
@@ -94,7 +99,7 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
   @override
   void initState() {
     super.initState();
-    searchBook();
+    getBookDetails();
   }
 
   @override
@@ -118,8 +123,10 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                   flex: 3,
                   child: Padding(
                     padding: const EdgeInsets.all(18.0),
-                    child: Image.network(
-                        "https://gutenberg.org/cache/epub/${widget.id}/pg${widget.id}.cover.medium.jpg"),
+                    child: widget.imageUrl.isNotEmpty
+                        ? Image.network(
+                            "https://gutenberg.org/cache/epub/${widget.id}/pg${widget.id}.cover.medium.jpg")
+                        : Image.asset("assets/no_image.png"),
                   ),
                 ),
                 Expanded(
@@ -135,17 +142,38 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                               borderRadius: BorderRadius.circular(10.0)),
                           child: TextButton(
                             onPressed: () {
-                              getBookMark();
-                              print("bookmark updated:${widget.bookmark}");
+                              if (widget.imageUrl.isEmpty) {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text(
+                                        "This book is an audio book, which means that it can not be read"
+                                        "please checkout the link below:\nhttps://gutenberg.org/ebooks/${widget.id}",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Center(child: Text('OK')))
+                                      ],
+                                    );
+                                  },
+                                );
+                              } else {
+                                getBookmark();
+                                print("bookmark updated:${widget.bookmark}");
 
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => BookReader(
-                                      id: widget.id,
-                                      title: widget.title,
-                                      bookmark: widget.bookmark),
-                                ),
-                              );
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => BookReader(
+                                        id: widget.id,
+                                        title: widget.title,
+                                        bookmark: widget.bookmark),
+                                  ),
+                                );
+                              }
                             },
                             child: const Padding(
                               padding: EdgeInsets.symmetric(

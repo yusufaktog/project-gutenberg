@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
@@ -104,9 +105,12 @@ class _SearchBookPageState extends State<SearchBookPage> {
         drawer: Drawer(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ListView(
-              children: <Widget>[
-                UserAccountsDrawerHeader(
+            child: Container(
+              color: Colors.grey,
+              child: ListView(
+                primary: true,
+                children: <Widget>[
+                  UserAccountsDrawerHeader(
                     currentAccountPicture: CircleAvatar(
                       backgroundColor: Colors.red[400],
                       child: const Icon(
@@ -115,41 +119,70 @@ class _SearchBookPageState extends State<SearchBookPage> {
                         color: Colors.grey,
                       ),
                     ),
-                    accountName: Text("default"),
-                    accountEmail: Text("default")),
-                const DrawerHeader(
-                  child: Center(
-                    child: Text('Email'),
+                    accountName:
+                        StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: FirebaseFirestore.instance
+                          .collection('User')
+                          .snapshots(),
+                      builder: (_, snapshot) {
+                        var name = const Text("default");
+                        try {
+                          final docs = snapshot.data!.docs;
+                          for (var element in docs) {
+                            if (element.id == widget.user!.uid) {
+                              name = Text(
+                                element.data()["name"],
+                                style: const TextStyle(
+                                    color: Colors.black, fontSize: 20),
+                              );
+                            }
+                          }
+                        } on Error {
+                          print('db error');
+                        }
+
+                        return name;
+                      },
+                    ),
+                    accountEmail: Text(
+                      widget.user!.email!,
+                      style: const TextStyle(color: Colors.black, fontSize: 15),
+                    ),
                   ),
-                  decoration: BoxDecoration(
+                  Container(
                     color: Colors.blue,
+                    child: ListTile(
+                      trailing: libraryIcon,
+                      title: const Text('Bookshelf'),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const BookshelfPage(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                ListTile(
-                  tileColor: Colors.blue,
-                  title: const Text('Bookshelf'),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const BookshelfPage(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 8.0),
-                ListTile(
-                  title: const Text('Log Out'),
-                  tileColor: Colors.red,
-                  onTap: () {
-                    _authService.signOut();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                  const SizedBox(height: 8.0),
+                  Container(
+                    color: Colors.blue,
+                    child: ListTile(
+                      trailing: logoutIcon,
+                      title: const Text('Log Out'),
+                      tileColor: Colors.red,
+                      onTap: () {
+                        _authService.signOut();
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginPage(),
+                            ),
+                            (route) => false);
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -221,9 +254,11 @@ class _SearchBookPageState extends State<SearchBookPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => DetailedBookPage(
-                                id: results[index].book.id!,
-                                title: results[index].book.title,
-                                bookmark: 0),
+                              id: results[index].book.id!,
+                              title: results[index].book.title,
+                              bookmark: 0,
+                              imageUrl: results[index].book.coverImageUrl,
+                            ),
                           ),
                         );
                       },

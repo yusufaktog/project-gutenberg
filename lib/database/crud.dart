@@ -78,4 +78,20 @@ class DatabaseHelper {
       return true;
     }
   }
+
+  static Future<String> getCurrentUserName() async {
+    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+    final User? user = _firebaseAuth.currentUser;
+    String uid = user!.uid;
+    String name = "def";
+    await FirebaseFirestore.instance
+        .collection("User")
+        .doc(uid)
+        .snapshots()
+        .forEach((element) {
+      name = element["name"];
+    });
+    return name;
+  }
 }

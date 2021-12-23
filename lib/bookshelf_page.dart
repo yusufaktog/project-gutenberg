@@ -23,7 +23,7 @@ class _BookshelfPageState extends State<BookshelfPage> {
     return Scaffold(
       backgroundColor: Colors.grey,
       appBar: AppBar(
-        title: const Center(child: Text("_user!.displayName.toString()")),
+        title: const Center(child: Text("My Bookshelf")),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -45,10 +45,11 @@ class _BookshelfPageState extends State<BookshelfPage> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => DetailedBookPage(
-                                      id: books[index]["image_url"]
-                                          .split('/')[6],
-                                      title: books[index]["title"],
-                                      bookmark: books[index]["bookmark"]),
+                                    id: books[index]["id"],
+                                    title: books[index]["title"],
+                                    bookmark: books[index]["bookmark"],
+                                    imageUrl: books[index]["image_url"],
+                                  ),
                                 ),
                               );
                             },

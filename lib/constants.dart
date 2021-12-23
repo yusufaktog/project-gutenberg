@@ -6,6 +6,12 @@ import 'main.dart';
 const coverThumb = "https://gutenberg.org/";
 const searchIcon = Icon(Icons.search);
 const preferredAppBarHeight = Size.fromHeight(100);
+const Icon logoutIcon = Icon(
+  IconData(0xf88b, fontFamily: 'MaterialIcons'),
+  color: Colors.red,
+);
+const libraryIcon = Icon(Icons.local_library_sharp);
+
 var routes = {
   LoginPage.routeName: (context) => const LoginPage(),
 };
