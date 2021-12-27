@@ -14,6 +14,7 @@ Future<void> main() async {
   await Firebase.initializeApp(options: firebaseConfig);
   runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       initialRoute: LoginPage.routeName,
       routes: routes,
     ),
@@ -186,27 +187,6 @@ class _LoginPageState extends State<LoginPage> {
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold),
                             ),
-                          ),
-                        ),
-                      ),
-                      Card(
-                        color: Colors.grey,
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 10.0, horizontal: 10.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextButton(
-                            onPressed: () {
-                              _authService
-                                  .signIn("alicem@gmail.com", "alicem123")
-                                  .then((user) => {
-                                        buildPushAndRemoveUntil(context, user),
-                                      });
-                            },
-                            child: const Text("TEST"),
                           ),
                         ),
                       ),

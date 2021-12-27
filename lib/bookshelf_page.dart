@@ -20,58 +20,60 @@ class _BookshelfPageState extends State<BookshelfPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey,
-      appBar: AppBar(
-        title: const Center(child: Text("My Bookshelf")),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection("Bookshelves")
-                  .doc(_user!.uid)
-                  .collection("Bookshelf")
-                  .snapshots(),
-              builder: (context, snapshot) {
-                return snapshot.connectionState != ConnectionState.waiting
-                    ? ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: snapshot.data!.size,
-                        itemBuilder: (context, index) {
-                          var books = snapshot.data!.docs;
-                          return InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => DetailedBookPage(
-                                    id: books[index]["id"],
-                                    title: books[index]["title"],
-                                    bookmark: books[index]["bookmark"],
-                                    imageUrl: books[index]["image_url"],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.grey,
+        appBar: AppBar(
+          title: const Center(child: Text("My Bookshelf")),
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection("Bookshelves")
+                    .doc(_user!.uid)
+                    .collection("Bookshelf")
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  return snapshot.connectionState != ConnectionState.waiting
+                      ? ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: snapshot.data!.size,
+                          itemBuilder: (context, index) {
+                            var books = snapshot.data!.docs;
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => DetailedBookPage(
+                                      id: books[index]["id"],
+                                      title: books[index]["title"],
+                                      bookmark: books[index]["bookmark"],
+                                      imageUrl: books[index]["image_url"],
+                                    ),
                                   ),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0, horizontal: 16.0),
+                                child: BookCard(
+                                  user: _user,
+                                  book: Book.previewed(
+                                      books[index]["image_url"],
+                                      books[index]["title"],
+                                      books[index]["author"],
+                                      books[index]["bookmark"],
+                                      books[index]["id"]),
                                 ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0, horizontal: 16.0),
-                              child: BookCard(
-                                user: _user,
-                                book: Book.previewed(
-                                    books[index]["image_url"],
-                                    books[index]["title"],
-                                    books[index]["author"],
-                                    books[index]["bookmark"],
-                                    books[index]["id"]),
                               ),
-                            ),
-                          );
-                        })
-                    : const Center(
-                        child: CircularProgressIndicator(),
-                      );
-              }),
+                            );
+                          })
+                      : const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                }),
+          ),
         ),
       ),
     );

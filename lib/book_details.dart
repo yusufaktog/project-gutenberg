@@ -153,10 +153,13 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                                       ),
                                       actions: [
                                         TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Center(child: Text('OK')))
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Center(
+                                            child: Text('OK'),
+                                          ),
+                                        )
                                       ],
                                     );
                                   },
