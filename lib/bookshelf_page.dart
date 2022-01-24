@@ -31,6 +31,12 @@ class _BookshelfPageState extends State<BookshelfPage> {
             child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance.collection("Bookshelves").doc(_user!.uid).collection("Bookshelf").snapshots(),
                 builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                        child: Text("You don't have a book in your library yet, "
+                            "you can search for the book you want from the home page, add it to your library, read it,"
+                            " and then continue where you left off!"));
+                  }
                   return snapshot.connectionState != ConnectionState.waiting
                       ? ListView.builder(
                           shrinkWrap: true,

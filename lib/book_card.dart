@@ -42,7 +42,7 @@ class _BookCardState extends State<BookCard> {
         child: Row(
           children: <Widget>[
             Expanded(
-              flex: 2,
+              flex: 3,
               child: widget.book.coverImageUrl.isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.all(4.0),
@@ -51,7 +51,7 @@ class _BookCardState extends State<BookCard> {
                   : Image.asset("assets/no_image.png"),
             ),
             Expanded(
-              flex: 5,
+              flex: 6,
               child: Column(
                 children: <Widget>[
                   Text(
@@ -81,10 +81,10 @@ class _BookCardState extends State<BookCard> {
               ),
             ),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Card(
                 color: Colors.red,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                 child: TextButton(
                   onPressed: () {
                     widget.inBookShelf ? DatabaseHelper.removeBook(widget.book) : DatabaseHelper.addBook(widget.book);
