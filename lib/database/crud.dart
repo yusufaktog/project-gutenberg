@@ -1,30 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../book_card.dart';
 
 class DatabaseHelper {
   static void addBook(Book book) async {
-    print("Book is being added${book.id}");
-
     final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     final User? user = _firebaseAuth.currentUser;
 
     String uid = user!.uid;
-
+    if (await bookshelfContains(book.id!)) {
+      Fluttertoast.showToast(
+          msg: "${book.title} has been already added to your bookshelf\nPLease check out your bookshelf", webPosition: "center", webShowClose: true);
+      return;
+    }
     await FirebaseFirestore.instance
         .collection("Bookshelves")
         .doc(uid)
         .collection("Bookshelf")
         .doc(book.id)
-        .set({
-      "id": book.id,
-      "title": book.title,
-      "author": book.author,
-      "bookmark": book.bookmark,
-      "image_url": book.coverImageUrl
-    });
+        .set({"id": book.id, "title": book.title, "author": book.author, "bookmark": book.bookmark, "image_url": book.coverImageUrl}).whenComplete(
+            () => Fluttertoast.showToast(msg: "${book.title} has been added to your bookshelf", webPosition: "center", webShowClose: true));
   }
 
   static void updateBookmark(String bookId, int bookmark) async {
@@ -34,28 +32,18 @@ class DatabaseHelper {
 
     String uid = user!.uid;
 
-    await FirebaseFirestore.instance
-        .collection("Bookshelves")
-        .doc(uid)
-        .collection("Bookshelf")
-        .doc(bookId)
-        .update({"bookmark": bookmark});
+    await FirebaseFirestore.instance.collection("Bookshelves").doc(uid).collection("Bookshelf").doc(bookId).update({"bookmark": bookmark});
   }
 
-  static void removeBook(String bookId) async {
-    print("Book is being removed$bookId");
+  static void removeBook(Book book) async {
     final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     final User? user = _firebaseAuth.currentUser;
 
     String uid = user!.uid;
 
-    await FirebaseFirestore.instance
-        .collection("Bookshelves")
-        .doc(uid)
-        .collection("Bookshelf")
-        .doc(bookId)
-        .delete();
+    await FirebaseFirestore.instance.collection("Bookshelves").doc(uid).collection("Bookshelf").doc(book.id).delete().whenComplete(
+        () => Fluttertoast.showToast(msg: "${book.title} has been removed from your bookshelf", webPosition: "center", webShowClose: true));
   }
 
   static Future<bool> bookshelfContains(String bookId) async {
@@ -85,11 +73,7 @@ class DatabaseHelper {
     final User? user = _firebaseAuth.currentUser;
     String uid = user!.uid;
     String name = "def";
-    await FirebaseFirestore.instance
-        .collection("User")
-        .doc(uid)
-        .snapshots()
-        .forEach((element) {
+    await FirebaseFirestore.instance.collection("User").doc(uid).snapshots().forEach((element) {
       name = element["name"];
     });
     return name;

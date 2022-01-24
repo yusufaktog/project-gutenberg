@@ -12,13 +12,7 @@ class DetailedBookPage extends StatefulWidget {
   final String imageUrl;
   int bookmark;
 
-  DetailedBookPage(
-      {Key? key,
-      required this.id,
-      required this.title,
-      required this.bookmark,
-      required this.imageUrl})
-      : super(key: key);
+  DetailedBookPage({Key? key, required this.id, required this.title, required this.bookmark, required this.imageUrl}) : super(key: key);
 
   @override
   State<DetailedBookPage> createState() => _DetailedBookPageState();
@@ -30,7 +24,7 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
 
   Future<void> getBookDetails() async {
     var searchUrlFormat = "https://gutenberg.org/ebooks/${widget.id}";
-    print("book link ==> " + searchUrlFormat);
+
     var parsedUrl = Uri.parse(searchUrlFormat);
 
     final response = await http.Client().get(
@@ -43,18 +37,18 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
 
     var rows = pageContent[0].getElementsByTagName('tr');
 
-    int index = 0;
+    //int index = 0;
     int duplicatedKeyIndex = 1;
 
     for (var element in rows) {
       try {
-        var key = rows[index].getElementsByTagName('th')[0].text.trim();
-        var value = rows[index].getElementsByTagName('td')[0].text.trim();
+        var key = element.getElementsByTagName('th')[0].text.trim();
+        var value = element.getElementsByTagName('td')[0].text.trim();
         setState(() {
           if (!details.containsKey(key)) {
             details[key] = value;
             keys.add(key);
-            duplicatedKeyIndex = 1;
+            duplicatedKeyIndex = 2;
           } else {
             var duplicatedKey = key + " " + duplicatedKeyIndex.toString();
             details[duplicatedKey] = value;
@@ -62,10 +56,8 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
             keys.add(duplicatedKey);
           }
         });
-      } on RangeError {
-        print('Content of book is corrupted!');
-      }
-      index++;
+      } on RangeError {}
+      //index++;
     }
   }
 
@@ -77,13 +69,7 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
     int bookmark = 0;
 
     try {
-      await FirebaseFirestore.instance
-          .collection("Bookshelves")
-          .doc(uid)
-          .collection("Bookshelf")
-          .doc(widget.id)
-          .snapshots()
-          .forEach((element) {
+      await FirebaseFirestore.instance.collection("Bookshelves").doc(uid).collection("Bookshelf").doc(widget.id).snapshots().forEach((element) {
         if (element["id"] == widget.id) {
           setState(() {
             bookmark = element["bookmark"];
@@ -124,8 +110,7 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(18.0),
                     child: widget.imageUrl.isNotEmpty
-                        ? Image.network(
-                            "https://gutenberg.org/cache/epub/${widget.id}/pg${widget.id}.cover.medium.jpg")
+                        ? Image.network("https://gutenberg.org/cache/epub/${widget.id}/pg${widget.id}.cover.medium.jpg")
                         : Image.asset("assets/no_image.png"),
                   ),
                 ),
@@ -138,8 +123,7 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                         Card(
                           color: Colors.red,
                           margin: const EdgeInsets.all(8.0),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
                           child: TextButton(
                             onPressed: () {
                               if (widget.imageUrl.isEmpty) {
@@ -147,9 +131,10 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                                   context: context,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
-                                      title: Text(
-                                        "This book is an audio book, which means that it can not be read"
-                                        "please checkout the link below:\nhttps://gutenberg.org/ebooks/${widget.id}",
+                                      title: RichText(
+                                        text: TextSpan(
+                                            text: "This book is an audio book, which means that it can not be read "
+                                                "please checkout the link below:\nhttps://gutenberg.org/ebooks/${widget.id}"),
                                       ),
                                       actions: [
                                         TextButton(
@@ -166,21 +151,15 @@ class _DetailedBookPageState extends State<DetailedBookPage> {
                                 );
                               } else {
                                 getBookmark();
-                                print("bookmark updated:${widget.bookmark}");
-
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => BookReader(
-                                        id: widget.id,
-                                        title: widget.title,
-                                        bookmark: widget.bookmark),
+                                    builder: (context) => BookReader(id: widget.id, title: widget.title, bookmark: widget.bookmark),
                                   ),
                                 );
                               }
                             },
                             child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 20.0, horizontal: 50),
+                              padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50),
                               child: Text("Read Book"),
                             ),
                           ),

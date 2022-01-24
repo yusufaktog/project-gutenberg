@@ -11,15 +11,11 @@ class Book {
   int? bookmark;
   String? id;
 
-  Book.previewed(
-      this.coverImageUrl, this.title, this.author, this.bookmark, this.id);
+  Book.previewed(this.coverImageUrl, this.title, this.author, this.bookmark, this.id);
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Book &&
-          runtimeType == other.runtimeType &&
-          coverImageUrl == other.coverImageUrl;
+      identical(this, other) || other is Book && runtimeType == other.runtimeType && coverImageUrl == other.coverImageUrl;
 
   @override
   int get hashCode => coverImageUrl.hashCode;
@@ -28,23 +24,15 @@ class Book {
 class BookCard extends StatefulWidget {
   final Book book;
   final User? user;
+  final bool inBookShelf;
 
-  const BookCard({Key? key, required this.book, required this.user})
-      : super(key: key);
+  const BookCard({Key? key, required this.book, required this.user, required this.inBookShelf}) : super(key: key);
 
   @override
   State<BookCard> createState() => _BookCardState();
 }
 
 class _BookCardState extends State<BookCard> {
-  late bool _hasBook;
-
-  @override
-  void initState() {
-    super.initState();
-    hasBook();
-  }
-
   @override
   Card build(BuildContext context) {
     return Card(
@@ -96,25 +84,17 @@ class _BookCardState extends State<BookCard> {
               flex: 2,
               child: Card(
                 color: Colors.red,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                 child: TextButton(
-                  onPressed: () async {
-                    _hasBook =
-                        await DatabaseHelper.bookshelfContains(widget.book.id!)
-                            .then((value) {
-                      return value;
-                    });
-                    _hasBook
-                        ? DatabaseHelper.removeBook(widget.book.id!)
-                        : DatabaseHelper.addBook(widget.book);
+                  onPressed: () {
+                    widget.inBookShelf ? DatabaseHelper.removeBook(widget.book) : DatabaseHelper.addBook(widget.book);
                   },
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 1.0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 1.0),
                     child: Text(
-                      "Add \n& Remove \nBook",
+                      widget.inBookShelf ? "REMOVE" : "ADD",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
@@ -127,12 +107,5 @@ class _BookCardState extends State<BookCard> {
         ),
       ),
     );
-  }
-
-  void hasBook() async {
-    _hasBook =
-        await DatabaseHelper.bookshelfContains(widget.book.id!).then((value) {
-      return value;
-    });
   }
 }

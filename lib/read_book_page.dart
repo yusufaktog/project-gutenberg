@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:indexed_list_view/indexed_list_view.dart';
@@ -11,9 +13,7 @@ class BookReader extends StatefulWidget {
   final String title;
   final int bookmark;
 
-  const BookReader(
-      {Key? key, required this.id, required this.title, required this.bookmark})
-      : super(key: key);
+  const BookReader({Key? key, required this.id, required this.title, required this.bookmark}) : super(key: key);
 
   @override
   State<BookReader> createState() => _BookReaderState();
@@ -25,9 +25,8 @@ class _BookReaderState extends State<BookReader> {
   List<String> pages = [];
 
   Future<void> getBookContent() async {
-    var contentLink =
-        "https://gutenberg.org/cache/epub/${widget.id}/pg${widget.id}-images.html";
-    print(contentLink);
+    var contentLink = "https://gutenberg.org/cache/epub/${widget.id}/pg${widget.id}-images.html";
+
     var parsedUrl = Uri.parse(contentLink);
     final response = await http.Client().get(
       parsedUrl,
@@ -87,12 +86,21 @@ class _BookReaderState extends State<BookReader> {
                           ),
                           color: Colors.red,
                           onPressed: () {
-                            try {
-                              DatabaseHelper.updateBookmark(widget.id, index);
-                            } on FirebaseException {
-                              print(
-                                  "You do not have this book in your bookshelf");
-                            }
+                            FirebaseFirestore.instance
+                                .collection("Bookshelves")
+                                .doc(FirebaseAuth.instance.currentUser!.uid)
+                                .collection("Bookshelf")
+                                .doc(widget.id)
+                                .get()
+                                .then((value) {
+                              if (value.exists) {
+                                DatabaseHelper.updateBookmark(widget.id, index);
+                                Fluttertoast.showToast(
+                                    msg: "Bookmark of ${widget.title} has been set to $index", webShowClose: true, webPosition: "center");
+                              } else {
+                                Fluttertoast.showToast(msg: "You do not have this book in your bookshelf", webShowClose: true, webPosition: "center");
+                              }
+                            });
                           },
                         ),
                       ],

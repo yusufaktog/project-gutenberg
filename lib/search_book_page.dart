@@ -33,9 +33,7 @@ class _SearchBookPageState extends State<SearchBookPage> {
 
   void searchBook(String query) async {
     query = query.trim().replaceAll(' ', '+');
-    var searchUrlFormat =
-        "https://gutenberg.org/ebooks/search/?query=$query&submit_search=Go%21";
-    print(searchUrlFormat);
+    var searchUrlFormat = "https://gutenberg.org/ebooks/search/?query=$query&submit_search=Go%21";
     var parsedUrl = Uri.parse(searchUrlFormat);
 
     final response = await http.Client().get(
@@ -45,7 +43,7 @@ class _SearchBookPageState extends State<SearchBookPage> {
     var document = parse(str);
 
     var pageContent = document.getElementsByClassName("booklink");
-    pageContent.forEach((element) {
+    for (var element in pageContent) {
       String coverThumb = "";
       String title = "";
       String author = "";
@@ -54,18 +52,15 @@ class _SearchBookPageState extends State<SearchBookPage> {
       try {
         title = element.getElementsByClassName("title")[0].text;
         author = element.getElementsByClassName("subtitle")[0].text;
-        id = element
-            .getElementsByClassName("link")[0]
-            .attributes["href"]!
-            .split('/')[2];
-        coverThumb = "https://gutenberg.org/" +
-            element.getElementsByClassName("cover-thumb")[0].attributes["src"]!;
+        id = element.getElementsByClassName("link")[0].attributes["href"]!.split('/')[2];
+        coverThumb = "https://gutenberg.org/" + element.getElementsByClassName("cover-thumb")[0].attributes["src"]!;
 
         book = Book.previewed(coverThumb, title, author, 0, id);
         setState(() {
           results.add(BookCard(
             user: widget.user,
             book: book,
+            inBookShelf: false,
           ));
         });
       } on RangeError {
@@ -73,13 +68,11 @@ class _SearchBookPageState extends State<SearchBookPage> {
           coverThumb = "";
           book = Book.previewed(coverThumb, title, author, 0, id);
           results.add(
-            BookCard(user: widget.user, book: book),
+            BookCard(user: widget.user, book: book, inBookShelf: false),
           );
         });
-        print('Content of book is corrupted!');
       }
-    });
-    print('----------------');
+    }
   }
 
   @override
@@ -93,8 +86,8 @@ class _SearchBookPageState extends State<SearchBookPage> {
 
   @override
   void dispose() {
-    _debounce?.cancel();
     super.dispose();
+    _debounce?.cancel();
   }
 
   @override
@@ -119,11 +112,8 @@ class _SearchBookPageState extends State<SearchBookPage> {
                         color: Colors.grey,
                       ),
                     ),
-                    accountName:
-                        StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                      stream: FirebaseFirestore.instance
-                          .collection('User')
-                          .snapshots(),
+                    accountName: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: FirebaseFirestore.instance.collection('User').snapshots(),
                       builder: (_, snapshot) {
                         var name = const Text("default");
                         try {
@@ -132,28 +122,28 @@ class _SearchBookPageState extends State<SearchBookPage> {
                             if (element.id == widget.user!.uid) {
                               name = Text(
                                 element.data()["name"],
-                                style: const TextStyle(
-                                    color: Colors.black, fontSize: 20),
+                                style: const TextStyle(color: Colors.black, fontSize: 20),
                               );
                             }
                           }
-                        } on Error {
-                          print('db error');
-                        }
+                        } on Error {}
 
                         return name;
                       },
                     ),
                     accountEmail: Text(
                       widget.user!.email!,
-                      style: const TextStyle(color: Colors.black, fontSize: 15),
+                      style: const TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Container(
                     color: Colors.blue,
                     child: ListTile(
                       trailing: libraryIcon,
-                      title: const Text('Bookshelf'),
+                      title: const Text(
+                        'Bookshelf',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -168,7 +158,10 @@ class _SearchBookPageState extends State<SearchBookPage> {
                     color: Colors.blue,
                     child: ListTile(
                       trailing: logoutIcon,
-                      title: const Text('Log Out'),
+                      title: const Text(
+                        'Log Out',
+                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
                       tileColor: Colors.red,
                       onTap: () {
                         _authService.signOut();
@@ -202,10 +195,8 @@ class _SearchBookPageState extends State<SearchBookPage> {
                         hintStyle: const TextStyle(
                           color: Color(0xFFA0A0A0),
                         ),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
                         filled: true,
                         fillColor: const Color(0xFFF0F0F6),
                         focusColor: const Color(0xFFF0F0F6),
@@ -218,18 +209,21 @@ class _SearchBookPageState extends State<SearchBookPage> {
                             });
                           },
                         ),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.cancel),
-                          onPressed: () {
-                            t1.clear();
-                          },
-                        )),
+                        suffixIcon: t1.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.cancel),
+                                onPressed: () {
+                                  t1.clear();
+                                },
+                              )
+                            : null),
                     onChanged: (value) {
                       setState(() {
                         results.clear();
+                        // To prevent search algorithm from running appropriate when user types multiple entries too fast
+                        // By using timer, search engine works only once per second
                         if (_debounce?.isActive ?? false) _debounce?.cancel();
-                        _debounce =
-                            Timer(const Duration(milliseconds: 1000), () {
+                        _debounce = Timer(const Duration(milliseconds: 1000), () {
                           searchBook(value);
                         });
                       });
@@ -247,8 +241,7 @@ class _SearchBookPageState extends State<SearchBookPage> {
                 itemCount: results.length,
                 itemBuilder: (context, index) {
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                     child: InkWell(
                       onTap: () {
                         Navigator.of(context).push(

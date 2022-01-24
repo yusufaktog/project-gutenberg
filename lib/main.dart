@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:project_gutenberg/database/auth.dart';
 import 'package:project_gutenberg/search_book_page.dart';
 
@@ -17,6 +20,15 @@ Future<void> main() async {
       debugShowCheckedModeBanner: false,
       initialRoute: LoginPage.routeName,
       routes: routes,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''),
+        Locale('tr', ''),
+      ],
     ),
   );
 }
@@ -34,9 +46,10 @@ TextEditingController t1 = TextEditingController();
 
 class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
-  late String _name;
-  late String _password;
-  late String _email;
+  String _name = "";
+  String _password = "";
+  String _email = "";
+  String currentLocale = 'en';
 
   bool hasAccount = false;
 
@@ -45,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Visual Bookshelf"),
+          title: const Text("Virtual Bookshelf"),
           centerTitle: true,
         ),
         backgroundColor: Colors.grey,
@@ -55,76 +68,11 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: <Widget>[
-                  Card(
-                    elevation: 0.0,
-                    color: Colors.grey,
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 30.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextFormField(
-                        onChanged: (value) {
-                          _email = value;
-                        },
-                        cursorColor: Colors.black,
-                        cursorHeight: 25,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(
-                              gapPadding: 100.0,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
-                          hintText: "email",
-                          hintStyle: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 20,
-                              fontWeight: FontWeight.normal),
-                          prefixIcon: Icon(Icons.email),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Card(
-                    elevation: 0.0,
-                    color: Colors.grey,
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 0.0, horizontal: 30.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextFormField(
-                        onChanged: (value) {
-                          _password = value;
-                        },
-                        cursorColor: Colors.black,
-                        cursorHeight: 25,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(
-                              gapPadding: 100.0,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
-                          hintText: "password",
-                          hintStyle: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 20,
-                              fontWeight: FontWeight.normal),
-                          prefixIcon: Icon(Icons.security),
-                        ),
-                      ),
-                    ),
-                  ),
                   !hasAccount
                       ? Card(
                           elevation: 0.0,
                           color: Colors.grey,
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 30.0),
+                          margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
@@ -138,54 +86,100 @@ class _LoginPageState extends State<LoginPage> {
                               cursorHeight: 25,
                               keyboardType: TextInputType.text,
                               decoration: const InputDecoration(
-                                border: OutlineInputBorder(
-                                    gapPadding: 100.0,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
+                                border: OutlineInputBorder(gapPadding: 100.0, borderRadius: BorderRadius.all(Radius.circular(10))),
                                 hintText: "name",
-                                hintStyle: TextStyle(
-                                    color: Colors.black54,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.normal),
+                                hintStyle: TextStyle(color: Colors.black54, fontSize: 20, fontWeight: FontWeight.normal),
                                 prefixIcon: Icon(Icons.account_circle_rounded),
                               ),
                             ),
                           ),
                         )
                       : Container(),
+                  Card(
+                    elevation: 0.0,
+                    color: Colors.grey,
+                    margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        onChanged: (value) {
+                          _email = value;
+                        },
+                        cursorColor: Colors.black,
+                        cursorHeight: 25,
+                        keyboardType: TextInputType.text,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(gapPadding: 100.0, borderRadius: BorderRadius.all(Radius.circular(10))),
+                          hintText: "email",
+                          hintStyle: TextStyle(color: Colors.black54, fontSize: 20, fontWeight: FontWeight.normal),
+                          prefixIcon: Icon(Icons.email),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Card(
+                    elevation: 0.0,
+                    color: Colors.grey,
+                    margin: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        onChanged: (value) {
+                          _password = value;
+                        },
+                        cursorColor: Colors.black,
+                        cursorHeight: 25,
+                        keyboardType: TextInputType.text,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(gapPadding: 100.0, borderRadius: BorderRadius.all(Radius.circular(10))),
+                          hintText: "password",
+                          hintStyle: TextStyle(color: Colors.black54, fontSize: 20, fontWeight: FontWeight.normal),
+                          prefixIcon: Icon(Icons.security),
+                        ),
+                      ),
+                    ),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Card(
                         color: Colors.grey[800],
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 10.0, horizontal: 10.0),
+                        margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextButton(
-                            onPressed: () {
-                              hasAccount
-                                  ? _authService.signIn(_email, _password).then(
-                                      (user) => {
-                                            buildPushAndRemoveUntil(
-                                                context, user)
-                                          })
-                                  : _authService
-                                      .createUser(_name, _password, _email)
-                                      .then((user) => {
-                                            buildPushAndRemoveUntil(
-                                                context, user)
-                                          });
+                            onPressed: () async {
+                              var authSuccess = true;
+                              if (hasAccount) {
+                                await _authService.signIn(_email, _password).catchError((e) {
+                                  Fluttertoast.showToast(msg: e.toString().split("]")[1], webShowClose: true, webPosition: "center");
+                                  authSuccess = false;
+                                });
+                              } else {
+                                if (_name.isEmpty) {
+                                  Fluttertoast.showToast(msg: "Field 'name' can not be empty!", webShowClose: true, webPosition: "center");
+                                }
+                                await _authService.createUser(_name, _password, _email).catchError((e) {
+                                  Fluttertoast.showToast(msg: e.toString().split("]")[1], webShowClose: true, webPosition: "center");
+                                  authSuccess = false;
+                                });
+                              }
+                              if (authSuccess) {
+                                buildPushAndRemoveUntil(context, FirebaseAuth.instance.currentUser);
+                              }
                             },
                             child: Text(
                               hasAccount ? "LOGIN" : "SIGN UP",
-                              style: TextStyle(
-                                  color: Colors.red[400],
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold),
+                              style: TextStyle(color: Colors.red[400], fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -199,7 +193,22 @@ class _LoginPageState extends State<LoginPage> {
                       });
                     },
                     child: Text(
-                        hasAccount ? "SIGN UP " : "Already have an account ? "),
+                      hasAccount ? "SIGN UP " : "Already have an account ? ",
+                      style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        if (currentLocale == 'en') {
+                          currentLocale = 'tr';
+
+                          return;
+                        }
+                        currentLocale = 'en';
+                      });
+                    },
+                    child: Text(currentLocale.toUpperCase()),
                   )
                 ],
               ),
