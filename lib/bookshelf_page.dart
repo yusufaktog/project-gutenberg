@@ -39,6 +39,7 @@ class _BookshelfPageState extends State<BookshelfPage> {
                   }
                   return snapshot.connectionState != ConnectionState.waiting
                       ? ListView.builder(
+                          primary: false,
                           shrinkWrap: true,
                           itemCount: snapshot.data!.size,
                           itemBuilder: (context, index) {
@@ -57,7 +58,7 @@ class _BookshelfPageState extends State<BookshelfPage> {
                                 );
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
                                 child: BookCard(
                                   user: _user,
                                   book: Book.previewed(books[index]["image_url"], books[index]["title"], books[index]["author"],
